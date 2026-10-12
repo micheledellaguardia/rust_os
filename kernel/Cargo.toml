@@ -1,0 +1,14 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+description = "rust_os kernel"
+
+[dependencies]
+bootloader_api = "=0.11.10"
+x86_64 = { version = "=0.15.2", default-features = false, features = ["instructions", "abi_x86_interrupt"] }
+spin = "0.9"
+pic8259 = "0.11.0"
+pc-keyboard = "0.8.0"
+linked_list_allocator = "0.10"
+font8x8 = { version = "0.3", default-features = false, features = ["unicode"] }
