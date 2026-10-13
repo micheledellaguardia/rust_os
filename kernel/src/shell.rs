@@ -77,6 +77,8 @@ fn execute(line: &[u8]) {
             println!("  pci           list discovered PCI devices");
             println!("  netinfo       display network card information");
             println!("  tasks         list scheduled tasks");
+            println!("  reboot        restart the machine");
+            println!("  shutdown      power off the machine");
         }
         "pci" => {
             crate::pci::scan_bus(|dev| {
@@ -112,6 +114,14 @@ fn execute(line: &[u8]) {
             for task in process::snapshot() {
                 println!("  #{} {:<10} runs={}", task.id, task.name, task.ticks);
             }
+        }
+        "reboot" => {
+            println!("Rebooting...");
+            crate::power::reboot();
+        }
+        "shutdown" => {
+            println!("Shutting down...");
+            crate::power::shutdown();
         }
         other => println!("unknown command: {other} (try 'help')"),
     }

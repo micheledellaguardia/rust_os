@@ -148,7 +148,8 @@ Content-Type: text/html; charset=utf-8\r\n\
 Content-Length: 99\r\n\
 Connection: close\r\n\
 \r\n\
-<!DOCTYPE html><html><body><h1>Hello from rust_os bare-metal minimal web server!</h1></body></html>";
+<!DOCTYPE html><html><body><h1>Hello from Rust OS</h1>
+This is a bare-metal minimal web server</body></html>";
                 if socket.can_send() {
                     let _ = socket.send_slice(response);
                     socket.close();

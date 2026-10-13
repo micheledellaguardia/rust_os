@@ -14,6 +14,7 @@ mod memory;
 mod pci;
 mod e1000;
 mod net;
+mod power;
 mod process;
 mod serial;
 mod shell;

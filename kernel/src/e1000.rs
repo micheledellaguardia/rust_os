@@ -168,8 +168,9 @@ impl E1000Device {
         }
 
         let desc = &mut self.tx_descriptors[self.tx_cur];
-        // Bit 0: DD (Descriptor Done)
-        if desc.status != 0 && (desc.status & 1) == 0 {
+        // Bit 0: DD (Descriptor Done). The descriptor is free for reuse once the
+        // NIC has set DD; while DD is clear the previous frame is still in flight.
+        if (desc.status & 1) == 0 {
             return Err("tx queue full");
         }
 
