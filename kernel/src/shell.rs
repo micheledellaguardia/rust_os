@@ -69,7 +69,7 @@ fn execute(line: &[u8]) {
     match command {
         "" => {}
         "help" => {
-            println!("commands:");
+            println!("Rust OS commands:");
             println!("  help          show this help");
             println!("  echo <text>   print <text>");
             println!("  clear         clear the screen");
