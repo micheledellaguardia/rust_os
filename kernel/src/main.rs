@@ -12,6 +12,8 @@ mod interrupts;
 mod keyboard;
 mod memory;
 mod pci;
+mod e1000;
+mod net;
 mod process;
 mod serial;
 mod shell;
@@ -40,7 +42,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         framebuffer::init(framebuffer);
     }
 
-    println!("rust_os v0.1.0");
+    println!("Rust OS v0.1.1");
     println!("=================");
     println!("Booted via bootloader 0.11");
 
@@ -74,7 +76,14 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     if let Some(e1000) = pci::find_device(0x8086, 0x100E) {
         println!("[pci] Found Intel e1000 NIC: {:02x}:{:02x}.{}", e1000.bus, e1000.device, e1000.function);
         let bar0 = e1000.read_bar(0);
-        println!("[pci] e1000 BAR0 = {:#010x}", bar0);
+        let mmio_phys = (bar0 & 0xFFFF_FFF0) as u64;
+        println!("[pci] e1000 BAR0 PhysAddr = {:#010x}", mmio_phys);
+
+        // The bootloader maps all physical memory at physical_memory_offset using huge pages.
+        // We can access MMIO space directly through this offset mapping!
+        let mmio_virt = physical_memory_offset + mmio_phys;
+        e1000::init(&e1000, mmio_virt, physical_memory_offset);
+        net::init();
     } else {
         println!("[pci] Warning: e1000 NIC (0x8086:0x100E) not found!");
     }
@@ -82,6 +91,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     process::init();
     process::spawn("idle", process::idle_task);
     process::spawn("shell", shell::run);
+    process::spawn("net", net::net_task);
     process::spawn("worker", process::worker_task);
     println!(
         "[ok] {} tasks spawned; starting preemptive scheduler.",
@@ -101,7 +111,7 @@ fn alloc_error_handler(layout: core::alloc::Layout) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!();
-    println!("KERNEL PANIC: {info}");
+    println!("RUST OS KERNEL PANIC: {info}");
     loop {
         x86_64::instructions::hlt();
     }

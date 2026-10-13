@@ -33,6 +33,17 @@ fn write_byte(byte: u8) {
     }
 }
 
+/// Reads a byte from COM1 if available (bit 0 of Line Status Register).
+pub fn read_byte() -> Option<u8> {
+    unsafe {
+        if Port::<u8>::new(COM1 + 5).read() & 0x01 != 0 {
+            Some(Port::<u8>::new(COM1).read())
+        } else {
+            None
+        }
+    }
+}
+
 static SERIAL: Mutex<()> = Mutex::new(());
 
 pub fn _print(args: fmt::Arguments) {

@@ -44,10 +44,16 @@ pub fn run() -> ! {
     }
 }
 
-/// Blocks (halting the CPU) until a decoded key is available.
+/// Blocks (halting the CPU) until a decoded key is available from keyboard or serial.
 fn wait_for_key() -> u8 {
     loop {
         if let Some(byte) = keyboard::read_char() {
+            return byte;
+        }
+        if let Some(byte) = crate::serial::read_byte() {
+            if byte == b'\r' {
+                return b'\n';
+            }
             return byte;
         }
         x86_64::instructions::hlt();
@@ -69,6 +75,7 @@ fn execute(line: &[u8]) {
             println!("  clear         clear the screen");
             println!("  info          memory and uptime information");
             println!("  pci           list discovered PCI devices");
+            println!("  netinfo       display network card information");
             println!("  tasks         list scheduled tasks");
         }
         "pci" => {
@@ -78,6 +85,18 @@ fn execute(line: &[u8]) {
                     dev.bus, dev.device, dev.function, dev.vendor_id, dev.device_id, dev.class_code, dev.subclass
                 );
             });
+        }
+        "netinfo" => {
+            if let Some(nic) = crate::e1000::E1000.lock().as_ref() {
+                let mac = nic.mac_address();
+                println!(
+                    "Intel e1000 Gigabit NIC\n  MAC: {:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}\n  TX: {} frames, RX: {} frames",
+                    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5],
+                    nic.tx_count, nic.rx_count
+                );
+            } else {
+                println!("No network device initialized.");
+            }
         }
         "echo" => println!("{args}"),
         "clear" => crate::framebuffer::clear(),

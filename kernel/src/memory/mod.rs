@@ -11,7 +11,7 @@ use x86_64::{PhysAddr, VirtAddr};
 /// Virtual start address of the kernel heap.
 pub const HEAP_START: u64 = 0x_4444_4444_0000;
 /// Size of the kernel heap in bytes.
-pub const HEAP_SIZE: usize = 1024 * 1024; // 1 MiB
+pub const HEAP_SIZE: usize = 4 * 1024 * 1024; // 4 MiB
 
 /// The global allocator backing all `alloc` allocations in the kernel.
 #[global_allocator]
@@ -28,10 +28,6 @@ pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static>
     OffsetPageTable::new(level_4_table, physical_memory_offset)
 }
 
-/// Returns a mutable reference to the currently active level-4 page table.
-///
-/// # Safety
-/// See [`init`].
 unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut PageTable {
     use x86_64::registers::control::Cr3;
 
@@ -41,6 +37,13 @@ unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut
     let page_table_ptr: *mut PageTable = virtual_address.as_mut_ptr();
 
     unsafe { &mut *page_table_ptr }
+}
+
+/// Translates the given virtual address to the mapped physical address using the active level 4 table.
+pub fn translate_addr(virt: VirtAddr, physical_memory_offset: VirtAddr) -> Option<PhysAddr> {
+    use x86_64::structures::paging::Translate;
+    let mapper = unsafe { init(physical_memory_offset) };
+    mapper.translate_addr(virt)
 }
 
 /// A `FrameAllocator` that hands out frames from the bootloader memory map.
@@ -111,3 +114,35 @@ pub fn init_heap(
 
     Ok(())
 }
+
+/// Maps a range of physical memory (e.g. device MMIO BAR) with caching disabled.
+pub fn map_mmio_range(
+    mapper: &mut impl Mapper<Size4KiB>,
+    frame_allocator: &mut impl FrameAllocator<Size4KiB>,
+    phys_start: PhysAddr,
+    virt_start: VirtAddr,
+    size_bytes: usize,
+) -> Result<(), MapToError<Size4KiB>> {
+    let start_page = Page::<Size4KiB>::containing_address(virt_start);
+    let end_page = Page::<Size4KiB>::containing_address(virt_start + (size_bytes as u64 - 1));
+
+    let start_frame = PhysFrame::<Size4KiB>::containing_address(phys_start);
+    let mut current_frame = start_frame;
+
+    let flags = PageTableFlags::PRESENT
+        | PageTableFlags::WRITABLE
+        | PageTableFlags::NO_CACHE
+        | PageTableFlags::WRITE_THROUGH;
+
+    for page in Page::range_inclusive(start_page, end_page) {
+        unsafe {
+            mapper
+                .map_to(page, current_frame, flags, frame_allocator)?
+                .flush();
+        }
+        current_frame = PhysFrame::containing_address(current_frame.start_address() + 4096u64);
+    }
+
+    Ok(())
+}
+
