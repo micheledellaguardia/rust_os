@@ -68,7 +68,16 @@ fn execute(line: &[u8]) {
             println!("  echo <text>   print <text>");
             println!("  clear         clear the screen");
             println!("  info          memory and uptime information");
+            println!("  pci           list discovered PCI devices");
             println!("  tasks         list scheduled tasks");
+        }
+        "pci" => {
+            crate::pci::scan_bus(|dev| {
+                println!(
+                    "  {:02x}:{:02x}.{} -> Vendor: {:04x}, Device: {:04x}, Class: {:02x}.{:02x}",
+                    dev.bus, dev.device, dev.function, dev.vendor_id, dev.device_id, dev.class_code, dev.subclass
+                );
+            });
         }
         "echo" => println!("{args}"),
         "clear" => crate::framebuffer::clear(),

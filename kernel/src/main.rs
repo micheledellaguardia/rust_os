@@ -11,6 +11,7 @@ mod gdt;
 mod interrupts;
 mod keyboard;
 mod memory;
+mod pci;
 mod process;
 mod serial;
 mod shell;
@@ -61,6 +62,22 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
     memory::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
     println!("[ok] Heap initialized ({} KiB).", memory::HEAP_SIZE / 1024);
+
+    println!("[pci] Scanning PCI devices...");
+    pci::scan_bus(|dev| {
+        println!(
+            "  - {:02x}:{:02x}.{} -> Vendor: {:04x}, Device: {:04x}, Class: {:02x}.{:02x}",
+            dev.bus, dev.device, dev.function, dev.vendor_id, dev.device_id, dev.class_code, dev.subclass
+        );
+    });
+
+    if let Some(e1000) = pci::find_device(0x8086, 0x100E) {
+        println!("[pci] Found Intel e1000 NIC: {:02x}:{:02x}.{}", e1000.bus, e1000.device, e1000.function);
+        let bar0 = e1000.read_bar(0);
+        println!("[pci] e1000 BAR0 = {:#010x}", bar0);
+    } else {
+        println!("[pci] Warning: e1000 NIC (0x8086:0x100E) not found!");
+    }
 
     process::init();
     process::spawn("idle", process::idle_task);
