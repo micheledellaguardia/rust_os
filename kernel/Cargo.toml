@@ -5,7 +5,7 @@ edition = "2021"
 description = "rust_os kernel"
 
 [dependencies]
-bootloader_api = "=0.11.10"
+bootloader_api = "=0.11.17"
 x86_64 = { version = "=0.15.2", default-features = false, features = ["instructions", "abi_x86_interrupt"] }
 spin = "0.9"
 pic8259 = "0.11.0"

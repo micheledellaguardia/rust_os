@@ -151,59 +151,56 @@ extern "C" fn schedule(current_rsp: u64) -> u64 {
 /// Naked timer interrupt handler. Saves all general purpose registers, performs
 /// the context switch, restores the next task's registers and returns from the
 /// interrupt.
-#[naked]
+#[unsafe(naked)]
 pub extern "C" fn timer_isr() {
-    // SAFETY: this is a naked function whose only statement is the `asm!` block.
-    unsafe {
-        naked_asm!(
-            "push rax",
-            "push rcx",
-            "push rdx",
-            "push rbx",
-            "push rbp",
-            "push rsi",
-            "push rdi",
-            "push r8",
-            "push r9",
-            "push r10",
-            "push r11",
-            "push r12",
-            "push r13",
-            "push r14",
-            "push r15",
-            // First argument to `schedule` is the current (unmodified) RSP.
-            "mov rdi, rsp",
-            // Align the stack to 16 bytes for the call ABI, saving the real RSP
-            // in rbx (callee-saved) so we can restore it afterwards.
-            "mov rbx, rsp",
-            "and rsp, -16",
-            "call {schedule}",
-            // `rax` now holds the next task's RSP. Switch to it.
-            "mov rsp, rax",
-            "pop r15",
-            "pop r14",
-            "pop r13",
-            "pop r12",
-            "pop r11",
-            "pop r10",
-            "pop r9",
-            "pop r8",
-            "pop rdi",
-            "pop rsi",
-            "pop rbp",
-            "pop rbx",
-            "pop rdx",
-            "pop rcx",
-            "pop rax",
-            "iretq",
-            schedule = sym schedule,
-        );
-    }
+    naked_asm!(
+        "push rax",
+        "push rcx",
+        "push rdx",
+        "push rbx",
+        "push rbp",
+        "push rsi",
+        "push rdi",
+        "push r8",
+        "push r9",
+        "push r10",
+        "push r11",
+        "push r12",
+        "push r13",
+        "push r14",
+        "push r15",
+        // First argument to `schedule` is the current (unmodified) RSP.
+        "mov rdi, rsp",
+        // Align the stack to 16 bytes for the call ABI, saving the real RSP
+        // in rbx (callee-saved) so we can restore it afterwards.
+        "mov rbx, rsp",
+        "and rsp, -16",
+        "call {schedule}",
+        // `rax` now holds the next task's RSP. Switch to it.
+        "mov rsp, rax",
+        "pop r15",
+        "pop r14",
+        "pop r13",
+        "pop r12",
+        "pop r11",
+        "pop r10",
+        "pop r9",
+        "pop r8",
+        "pop rdi",
+        "pop rsi",
+        "pop rbp",
+        "pop rbx",
+        "pop rdx",
+        "pop rcx",
+        "pop rax",
+        "iretq",
+        schedule = sym schedule,
+    );
 }
 
 /// Enters a task for the first time by installing `rsp` and performing the same
 /// restore-and-return sequence as `timer_isr`.
-#[naked]
+#[unsafe(naked)]
 unsafe extern "C" fn restore_asm(rsp: u64) -> ! {
     naked_asm!(
         "mov rsp, rdi",

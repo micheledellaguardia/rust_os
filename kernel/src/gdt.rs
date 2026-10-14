@@ -23,7 +23,7 @@ static TSS: Once<TaskStateSegment> = Once::new();
 static GDT: Once<(GlobalDescriptorTable, Selectors)> = Once::new();
 
 fn tss() -> &'static TaskStateSegment {
-    TSS.call_once(|| unsafe {
+    TSS.call_once(|| {
         const STACK_SIZE: usize = 4096 * 5;
         static mut DOUBLE_FAULT_STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
 
