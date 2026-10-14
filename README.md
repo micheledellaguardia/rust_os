@@ -1,4 +1,4 @@
-# rust_os
+# RustOS
 
 A small, educational operating system kernel written in Rust, built on a pinned
 nightly toolchain and booted from a BIOS image in QEMU.
@@ -85,7 +85,7 @@ curl http://localhost:8080/
 
 Response:
 ```html
-<!DOCTYPE html><html><body><h1>Hello from rust_os bare-metal minimal web server!</h1></body></html>
+<!DOCTYPE html><html><body><h1>Hello from RustOS bare-metal minimal web server!</h1></body></html>
 ```
 
 ## Using the Shell
