@@ -41,7 +41,7 @@ pub fn init_idt() {
         }
         unsafe {
             idt[InterruptIndex::Timer.as_u8()]
-                .set_handler_addr(VirtAddr::new(process::timer_isr as usize as u64));
+                .set_handler_addr(VirtAddr::new(process::timer_isr as *const () as usize as u64));
         }
         idt[InterruptIndex::Keyboard.as_u8()].set_handler_fn(keyboard_interrupt_handler);
         idt

@@ -115,8 +115,8 @@ pub fn init_heap(
     Ok(())
 }
 
-/// Maps a range of physical memory (e.g. device MMIO BAR) with caching disabled.
-pub fn map_mmio_range(
+// Maps a range of physical memory (e.g. device MMIO BAR) with caching disabled.
+/* pub fn map_mmio_range(
     mapper: &mut impl Mapper<Size4KiB>,
     frame_allocator: &mut impl FrameAllocator<Size4KiB>,
     phys_start: PhysAddr,
@@ -144,5 +144,5 @@ pub fn map_mmio_range(
     }
 
     Ok(())
-}
+} */
 

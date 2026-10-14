@@ -19,6 +19,8 @@ pub struct PciDevice {
     pub device_id: u16,
     pub class_code: u8,
     pub subclass: u8,
+    /// The type of the PCI header (0 for device, 1 for PCI-to-PCI bridge, 2 for PCI-to-ISA bridge).
+    #[allow(dead_code)]
     pub header_type: u8,
 }
 

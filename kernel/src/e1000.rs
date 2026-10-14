@@ -11,7 +11,7 @@ use crate::pci::PciDevice;
 
 // e1000 Register Offsets
 const REG_CTRL: usize = 0x0000;      // Device Control
-const REG_STATUS: usize = 0x0008;    // Device Status
+// const REG_STATUS: usize = 0x0008;    // Device Status
 const REG_EERD: usize = 0x0014;      // EEPROM Read
 const REG_ICR: usize = 0x00C0;       // Interrupt Cause Read
 const REG_IMS: usize = 0x00D0;       // Interrupt Mask Set
@@ -31,14 +31,14 @@ const REG_MTA: usize = 0x5200;       // Multicast Table Array (0x5200 - 0x53FC)
 
 // Control Register Bits
 const CTRL_SLU: u32 = 1 << 6;        // Set Link Up
-const CTRL_RST: u32 = 1 << 26;       // Device Reset
+// const CTRL_RST: u32 = 1 << 26;       // Device Reset
 
 // RCTL (Receive Control) Bits
 const RCTL_EN: u32 = 1 << 1;         // Receiver Enable
-const RCTL_SBP: u32 = 1 << 2;        // Store Bad Packets
+// const RCTL_SBP: u32 = 1 << 2;        // Store Bad Packets
 const RCTL_UPE: u32 = 1 << 3;        // Unicast Promiscuous Enabled
 const RCTL_MPE: u32 = 1 << 4;        // Multicast Promiscuous Enabled
-const RCTL_LBM_NONE: u32 = 0 << 6;   // No loopback
+// const RCTL_LBM_NONE: u32 = 0 << 6;   // No loopback
 const RCTL_BAM: u32 = 1 << 15;       // Broadcast Accept Mode
 const RCTL_BSIZE_2048: u32 = 0 << 16;// Buffer Size 2048 Bytes
 const RCTL_SECRC: u32 = 1 << 26;     // Strip Ethernet CRC
