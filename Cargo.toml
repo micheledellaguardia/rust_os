@@ -1,6 +1,6 @@
 [package]
-name = "os"
-version = "0.1.0"
+name = "RustOS"
+version = "0.1.1"
 edition = "2021"
 description = "Build/run harness for the rust_os kernel"
 
